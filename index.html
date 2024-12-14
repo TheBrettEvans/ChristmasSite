@@ -10,7 +10,7 @@
     <h1>Christmas Gift Tracker</h1>
     <div class="form-container">
         <h2>Add a Gift</h2>
-        <form id="giftForm">
+        <form id="giftForm" autocomplete="off">
             <label for="giftName">Gift Name:</label>
             <input type="text" id="giftName" name="giftName" required>
             <br>
@@ -28,30 +28,33 @@
     </div>
 
     <script>
-        // Save the original content of the main page
-        const originalPageContent = document.body.innerHTML;
-
-        // Sample data for initial lists
-        const christmasLists = {
+        // Load saved lists or initialize default data
+        const savedLists = JSON.parse(localStorage.getItem('christmasLists'));
+        const christmasLists = savedLists || {
             'Zach': ['Jeans', 'Khakis', 'Chinos','Joggers','Lifting Shoes','Polos','Polo','Travel Mug','Elliot Root Conjure','Lord huron Vide Noir','Hozier Unreal, Unearth','Noah Kahan Busyhead','Zach Bryan American Heartbreak','Nintendo Switch Controllers','Xbox Series S','Wireless Gaming Headset','Chair','Birekenstocks','Flannel','Cardigan','Sweater','Vest','Rocky Mountain Vibes','Broncos Gear','Subaru Forester Air Mattress','Golf Clubs','Whiskey making kit','Snuggie','Amazon Giftcard','Displate Giftcard'],
             'Michael W': ['Curling pants', 'Curling anti-slider gripper','Grill press','Pasta cutter','Stop Pre Shirt','Campbell Camels shirt','Kitchenaide Pasta Press Attachment','Hozier Unreal Unearth','Hozier Hozier','Big Head Todd & the Monsters','Kid Cudi Man on the Moon','Wild Rivers','Revivalists not Take Good Care','Zach Bryan'],
             'Kensley': ['Broncos t-shirt', 'Broncos Shirt', 'Food Peelers','Rothy Giftcard','Amazon Giftcard','Lululemon Giftcard','Nordstrom','Kane Brown Experiment','Kane Brown Different Man','Jordan Davis Home State','Jordan Davis','Jordan Davis Buy Dirt','Kameron Marlowe','Taylor Swift Reputation','Mitchell Tenpenny','Duran Duran Rio','Duran Duran The Wedding Album','TLC Fan Mail','Mariah Carey'],
             'Mike Evans': ['Snowblower', 'Buffs gear', 'Broncos gear','Nuggets Gear'],
             'Heidi': [' CU Water Bottle', 'Bomba Socks', 'Sweatpants','Turtleneck white','Turtleneck gray','Turtleneck white','Turtleneck cream','Turtleneck turquoise'],
             'Derek': ['Nintendo Switch', 'Super Smash Bros Brawl Switch', 'Legends of Zelda Switch','Xbox Series S','Madden','Fifa','NCAA College Football 25','Khakis','Polo Shirts','Long Sleeve Dress Shirts','Flannel','Quarter Zip','Nuggets jersey','Warm Clothes','Homefield CU','Homefield UMN','Homefield St Peters','Homefield Tulane','<strong>Homefield Evergreen State</strong>','Homefield Delta State','Homefield UC santa Cruz','Socks','Workout Gear','Snow Boots','Gift Cards:','<ul>Computer Related</ul>','<ul>Golf Club Related</ul>','<ul>Furniture Related</ul>','Records:','<ul>Young the Giant</ul>','<ul>Avenged Sevenfold</ul>','<ul>Kendrick Lamar</ul>','<ul>Kanye West</ul>','<ul>Jordan Mackampa</ul>','Pizza Cutter','Cookie Tray','Stickers','Wallet','Pots','Pans','Amazon Fire TV Stick','Experience (tickets)','Blender','Electric Toothbrush'],
-            'Brett': ['Joggers', 'Sweatpants', 'Nuggets Jersey','Bo Nix Jersey','Lebron Hennessy','Travel Coffee Cup','Clearence Yeezy x Gap Clothing','Portable Charger','Carharrt Sweatshirts','Carharrt Shirts','Computer Monitor','Golf Items','Microsoft Office','XXL Mousepad','Portable SSD'],
+            'Brett': ['h','Joggers', 'Sweatpants', 'Nuggets Jersey','Bo Nix Jersey','Lebron Hennessy','Travel Coffee Cup','Clearence Yeezy x Gap Clothing','Portable Charger','Carharrt Sweatshirts','Carharrt Shirts','Computer Monitor','Golf Items','Microsoft Office','XXL Mousepad','Portable SSD'],
             'Ron Evans': ['Bridgestone Golf e12 Contact', 'Iphone 11 case', 'Nail Care Set','Toiletry Bag Organizer','Chamois Drying Cloth','Whiskey Glasses','Badger Shaving Brush','Shaving Soap For Men','Marble Shaving Towel','Heavy-Duty Wrap-it Storage Straps','Amazon Giftcard','Mens V Neck Golf Windbreaker'],
             'Vikki Evans': ['Womens Polo Shirts', 'Womens Golf Shorts', 'Flip Flops','Apple Watch Strap','Book','Adele 25','Gift Cards','<ul>Amazon</ul>','<ul>Homegoods</ul>','<ul>Khols</ul>']
         };
 
+        // Save updated lists to localStorage
+        function saveLists() {
+            localStorage.setItem('christmasLists', JSON.stringify(christmasLists));
+        }
+
         // Generate links for individual pages
         function generateLinks() {
             const linksContainer = document.getElementById('links');
-            linksContainer.innerHTML = ''; // Clear any existing content
+            linksContainer.innerHTML = '';
 
             for (const person in christmasLists) {
                 const personLink = document.createElement('a');
-                personLink.href = `#`; // Placeholder to mimic page navigation
+                personLink.href = `#`;
                 personLink.textContent = `${person}'s List`;
                 personLink.classList.add('person-link');
                 personLink.addEventListener('click', () => openPersonPage(person));
@@ -68,43 +71,34 @@
                 <button id="backButton">Back to Main Page</button>
             `;
 
-            document.body.innerHTML = listHTML; // Replace body content with the person's list
+            document.body.innerHTML = listHTML;
 
-            // Add event listener to the "Back to Main Page" button
             document.getElementById('backButton').addEventListener('click', restoreMainPage);
         }
 
-        // Restore the original main page content
+        // Restore the main page content
         function restoreMainPage() {
             document.body.innerHTML = originalPageContent;
-
-            // Reinitialize event listeners and functionality
             document.getElementById('giftForm').addEventListener('submit', handleFormSubmit);
             generateLinks();
         }
-        function clearCookies() {
-            document.cookie.split(';').forEach(cookie => {
-                document.cookie = cookie
-                    .replace(/^ +/, '')
-                    .replace(/=.*/, `=; expires=${new Date(0).toUTCString()}; path=/`);
-            });
-        }
+
         // Handle form submission
         function handleFormSubmit(event) {
-            event.preventDefault(); // Prevent page reload
-            clearCookies();
-            const giftName = document.getElementById('giftName').value.trim().toLowerCase();
+            event.preventDefault();
+
+            const giftName = document.getElementById('giftName').value.trim();
             const personName = document.getElementById('personName').value.trim();
 
             if (personName && christmasLists[personName]) {
-                // Find the gift in the list, ignoring case and trimming whitespace
                 const index = christmasLists[personName].findIndex(
-                    item => item.trim().toLowerCase() === giftName
+                    item => item.trim().toLowerCase() === giftName.toLowerCase()
                 );
 
                 if (index !== -1) {
-                    christmasLists[personName].splice(index, 1); // Remove the gift from the list
+                    christmasLists[personName].splice(index, 1);
                     alert(`${giftName} has been removed from ${personName}'s list.`);
+                    saveLists(); // Persist changes
                 } else {
                     alert(`${giftName} is not on ${personName}'s list.`);
                 }
@@ -112,10 +106,11 @@
                 alert(`${personName} does not have a list or input is invalid.`);
             }
 
-            document.getElementById('giftForm').reset(); // Clear the form
+            document.getElementById('giftForm').reset();
         }
 
         // Generate links and set up event listeners on load
+        const originalPageContent = document.body.innerHTML;
         document.getElementById('giftForm').addEventListener('submit', handleFormSubmit);
         generateLinks();
     </script>
