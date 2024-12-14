@@ -82,11 +82,17 @@
             document.getElementById('giftForm').addEventListener('submit', handleFormSubmit);
             generateLinks();
         }
-
+        function clearCookies() {
+            document.cookie.split(';').forEach(cookie => {
+                document.cookie = cookie
+                    .replace(/^ +/, '')
+                    .replace(/=.*/, `=; expires=${new Date(0).toUTCString()}; path=/`);
+            });
+        }
         // Handle form submission
         function handleFormSubmit(event) {
             event.preventDefault(); // Prevent page reload
-
+            clearCookies();
             const giftName = document.getElementById('giftName').value.trim().toLowerCase();
             const personName = document.getElementById('personName').value.trim();
 
