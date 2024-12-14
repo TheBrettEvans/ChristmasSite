@@ -14,6 +14,7 @@
         }
         .person-link {
             margin: 10px 0;
+            display: block;
         }
     </style>
 </head>
@@ -39,6 +40,9 @@
     </div>
 
     <script>
+        // Save the original content of the main page
+        const originalPageContent = document.body.innerHTML;
+
         // Sample data for initial lists
         const christmasLists = {
             'Alice': ['Book', 'Scarf', 'Puzzle'],
@@ -46,48 +50,58 @@
             'Charlie': ['Game Console', 'Sneakers', 'Board Game']
         };
 
-        // Generate individual pages for each person
-        function generatePages() {
+        // Generate links for individual pages
+        function generateLinks() {
+            const linksContainer = document.getElementById('links');
+            linksContainer.innerHTML = ''; // Clear any existing content
+
             for (const person in christmasLists) {
-                const pageContent = `<!DOCTYPE html>
-<html lang=\"en\">
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>${person}'s Gift List</title>
-</head>
-<body>
-    <h1>${person}'s Gift List</h1>
-    <ul>
-        ${christmasLists[person].map(item => `<li>${item}</li>`).join('')}
-    </ul>
-    <a href=\"index.html\">Back to Main Page</a>
-</body>
-</html>`;
-
-                const blob = new Blob([pageContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-
-                const link = document.createElement('a');
-                link.href = url;
-                link.textContent = `${person}'s List`;
-                link.classList.add('person-link');
-                link.target = '_blank';
-
-                document.getElementById('links').appendChild(link);
-                document.getElementById('links').appendChild(document.createElement('br'));
+                const personLink = document.createElement('a');
+                personLink.href = `#`; // Placeholder to mimic page navigation
+                personLink.textContent = `${person}'s List`;
+                personLink.classList.add('person-link');
+                personLink.addEventListener('click', () => openPersonPage(person));
+                linksContainer.appendChild(personLink);
             }
         }
 
-        // Event listener for the form
-        document.getElementById('giftForm').addEventListener('submit', function(event) {
+        // Open a person's page
+        function openPersonPage(person) {
+            const personList = christmasLists[person];
+            const listHTML = `
+                <h1>${person}'s Gift List</h1>
+                <ul>${personList.map(item => `<li>${item}</li>`).join('')}</ul>
+                <button id="backButton">Back to Main Page</button>
+            `;
+
+            document.body.innerHTML = listHTML; // Replace body content with the person's list
+
+            // Add event listener to the "Back to Main Page" button
+            document.getElementById('backButton').addEventListener('click', restoreMainPage);
+        }
+
+        // Restore the original main page content
+        function restoreMainPage() {
+            document.body.innerHTML = originalPageContent;
+
+            // Reinitialize event listeners and functionality
+            document.getElementById('giftForm').addEventListener('submit', handleFormSubmit);
+            generateLinks();
+        }
+
+        // Handle form submission
+        function handleFormSubmit(event) {
             event.preventDefault(); // Prevent page reload
 
-            const giftName = document.getElementById('giftName').value.trim();
+            const giftName = document.getElementById('giftName').value.trim().toLowerCase();
             const personName = document.getElementById('personName').value.trim();
 
-            if (giftName && personName && christmasLists[personName]) {
-                const index = christmasLists[personName].indexOf(giftName);
+            if (personName && christmasLists[personName]) {
+                // Find the gift in the list, ignoring case and trimming whitespace
+                const index = christmasLists[personName].findIndex(
+                    item => item.trim().toLowerCase() === giftName
+                );
+
                 if (index !== -1) {
                     christmasLists[personName].splice(index, 1); // Remove the gift from the list
                     alert(`${giftName} has been removed from ${personName}'s list.`);
@@ -99,10 +113,11 @@
             }
 
             document.getElementById('giftForm').reset(); // Clear the form
-        });
+        }
 
-        // Generate links and pages on load
-        generatePages();
+        // Generate links and set up event listeners on load
+        document.getElementById('giftForm').addEventListener('submit', handleFormSubmit);
+        generateLinks();
     </script>
 </body>
 </html>
