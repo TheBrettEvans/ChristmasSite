@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Gift Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        .person-link {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Christmas Gift Tracker</h1>
+    <div class="form-container">
+        <h2>Add a Gift</h2>
+        <form id="giftForm">
+            <label for="giftName">Gift Name:</label>
+            <input type="text" id="giftName" name="giftName" required>
+            <br>
+            <label for="personName">Who is it for:</label>
+            <input type="text" id="personName" name="personName" required>
+            <br><br>
+            <button type="submit">Add Gift</button>
+        </form>
+    </div>
+    <div class="lists-container">
+        <h2>Christmas Lists</h2>
+        <div id="links">
+            <!-- Links to individual pages will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        // Sample data for initial lists
+        const christmasLists = {
+            'Alice': ['Book', 'Scarf', 'Puzzle'],
+            'Bob': ['Wallet', 'Headphones'],
+            'Charlie': ['Game Console', 'Sneakers', 'Board Game']
+        };
+
+        // Generate individual pages for each person
+        function generatePages() {
+            for (const person in christmasLists) {
+                const pageContent = `<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>${person}'s Gift List</title>
+</head>
+<body>
+    <h1>${person}'s Gift List</h1>
+    <ul>
+        ${christmasLists[person].map(item => `<li>${item}</li>`).join('')}
+    </ul>
+    <a href=\"index.html\">Back to Main Page</a>
+</body>
+</html>`;
+
+                const blob = new Blob([pageContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = url;
+                link.textContent = `${person}'s List`;
+                link.classList.add('person-link');
+                link.target = '_blank';
+
+                document.getElementById('links').appendChild(link);
+                document.getElementById('links').appendChild(document.createElement('br'));
+            }
+        }
+
+        // Event listener for the form
+        document.getElementById('giftForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent page reload
+
+            const giftName = document.getElementById('giftName').value.trim();
+            const personName = document.getElementById('personName').value.trim();
+
+            if (giftName && personName && christmasLists[personName]) {
+                const index = christmasLists[personName].indexOf(giftName);
+                if (index !== -1) {
+                    christmasLists[personName].splice(index, 1); // Remove the gift from the list
+                    alert(`${giftName} has been removed from ${personName}'s list.`);
+                } else {
+                    alert(`${giftName} is not on ${personName}'s list.`);
+                }
+            } else {
+                alert(`${personName} does not have a list or input is invalid.`);
+            }
+
+            document.getElementById('giftForm').reset(); // Clear the form
+        });
+
+        // Generate links and pages on load
+        generatePages();
+    </script>
+</body>
+</html>
